@@ -1,0 +1,342 @@
+{%- comment -%}
+  Benefits: features list that auto-advances with progress bars, next to a product visual and testimonial.
+  Behaviour: <pv-autoplay-steps> (assets/pv-components.js).
+  Styles: assets/section-pv-benefits.css.
+{%- endcomment -%}
+{{ 'section-pv-benefits.css' | asset_url | stylesheet_tag }}
+<div class="pv-scope">
+<div class="pv-benefits">
+    <section class="max-w-7xl mx-auto px-4 py-20 md:py-32">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-24 items-start">
+            
+            <!-- Content Side (Right on Mobile, Left on Desktop) -->
+            <div class="flex flex-col gap-8 order-2 lg:order-1">
+                <div>
+                    <!-- Badge -->
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#9FDA40]/10 border border-[#9FDA40]/20 mb-6">
+                        <span class="material-symbols-outlined text-[#9FDA40] text-sm">{{ section.settings.badge_icon }}</span>
+                        <span style="font-family: var(--pv-font-body) !important; font-size: 11px !important; font-weight: 900 !important; letter-spacing: 0.1em !important; text-transform: uppercase !important; color: var(--pv-primary) !important;">{{ section.settings.badge_text }}</span>
+                    </div>
+
+                    <!-- Title -->
+                    <h2 style="font-family: var(--pv-font-heading) !important; font-size: var(--pv-h2-fs, clamp(2.5rem, 8vw, 4.5rem)) !important; font-weight: 400 !important; text-transform: uppercase !important; line-height: 0.9 !important; margin-bottom: 1.5rem !important;" class="text-slate-900 dark:text-white">
+                        {{ section.settings.heading }}
+                    </h2>
+
+                    <!-- Description -->
+                    <p style="font-family: var(--pv-font-body) !important; font-size: 1.125rem !important; font-weight: 500 !important; line-height: 1.6 !important; max-width: 550px !important;" class="text-slate-600 dark:text-slate-400 mb-10">
+                        {{ section.settings.description }}
+                    </p>
+                </div>
+
+                <!-- Accordion Features List -->
+                <pv-autoplay-steps class="flex flex-col gap-4" data-interval="{{ section.settings.interval | default: 5 | times: 1000 }}">
+                    
+                    {%- assign pv_features = section.blocks | where: 'type', 'feature' -%}
+                    {%- for block in pv_features %}
+                    <!-- Feature {{ forloop.index }} -->
+                    <div class="bs-accordion-item{% if forloop.first %} active{% endif %}" data-step {{ block.shopify_attributes }}>
+                        <div class="flex items-center gap-5">
+                            <div class="bs-icon-box">
+                                <span class="material-symbols-outlined text-lg">{{ block.settings.icon }}</span>
+                            </div>
+                            <h4 style="font-family: var(--pv-font-heading) !important; font-size: var(--pvbn-h4, 1.5rem) !important; font-weight: 400 !important; letter-spacing: 0.05em !important; text-transform: uppercase !important;" class="text-slate-900 dark:text-white">
+                                {{ block.settings.title }}
+                            </h4>
+                        </div>
+                        <div class="bs-accordion-content">
+                            <p style="font-family: var(--pv-font-body) !important; font-size: 0.875rem !important; font-weight: 500 !important; line-height: 1.5 !important;" class="text-slate-500 dark:text-slate-400 pl-[64px]">
+                                {{ block.settings.text }}
+                            </p>
+                            <div class="bs-progress-container ml-[64px]">
+                                <div class="bs-progress-fill" data-step-progress></div>
+                            </div>
+                        </div>
+                    </div>
+                    {%- endfor %}
+
+                </pv-autoplay-steps>
+            </div>
+
+            <!-- Visual Side -->
+            <div class="order-1 lg:order-2 bs-visual-container">
+                <div class="bs-visual-glass">
+                    <!-- Main Product Image -->
+                    <img loading="lazy" {% render 'pv-img-src', image: section.settings.image, asset: section.settings.image_asset, width: 1600 %} alt="{{ section.settings.image_alt | escape }}" class="w-full h-auto rounded-xl shadow-2xl relative z-10 mb-8" decoding="async" width="600" height="600">
+                    
+                    <!-- Testimonial Overlay -->
+                    <div class="bs-testimonial-card">
+    <div class="flex gap-1 mb-3">
+        <span class="material-symbols-outlined text-[#9FDA40] text-lg">star</span>
+        <span class="material-symbols-outlined text-[#9FDA40] text-lg">star</span>
+        <span class="material-symbols-outlined text-[#9FDA40] text-lg">star</span>
+        <span class="material-symbols-outlined text-[#9FDA40] text-lg">star</span>
+        <span class="material-symbols-outlined text-[#9FDA40] text-lg">star</span>
+    </div>
+    <p class="bs-testimonial-quote italic mb-6">
+        "{{ section.settings.quote }}"
+    </p>
+    <div class="flex items-center gap-4" style="padding-bottom: 1.5rem;">
+        <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#9FDA40] flex items-center justify-center text-black font-black text-xs md:text-sm">{{ section.settings.initials }}</div>
+        <div class="flex flex-col text-left">
+            <span class="font-bold text-xs md:text-sm text-slate-900 dark:text-white">{{ section.settings.author }}</span>
+            <span class="text-[9px] md:text-xs text-[#9FDA40] font-black uppercase tracking-widest">{{ section.settings.role }}</span>
+        </div>
+        <div class="ml-auto text-[9px] md:text-[10px] text-slate-400 font-bold uppercase">{{ section.settings.date }}</div>
+    </div>
+    <a href="{{ section.settings.button_link | escape }}" class="bs-reviews-btn">
+        {{ section.settings.button_label }}
+    </a>
+</div>
+
+                    <!-- Floating Performance Cards -->
+                    {%- assign pv_floats = section.blocks | where: 'type', 'floating_card' -%}
+                    {%- for block in pv_floats %}
+                    <div class="bs-floating-card{% if block.settings.animate %} bs-animate-float{% endif %}" style="{{ block.settings.position_style }}" {{ block.shopify_attributes }}>
+                        <span style="display: block !important; color: var(--pv-primary) !important; font-weight: 800; font-size: 0.75rem; text-transform: uppercase;">{{ block.settings.label }}</span>
+                    </div>
+                    {%- endfor %}
+
+                    <!-- Ambient Glow -->
+                    <div class="absolute -top-10 -left-10 w-64 h-64 bg-[#9FDA40]/10 rounded-full blur-[80px] pointer-events-none"></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</div>
+
+</div>
+
+{% schema %}
+{
+  "name": "Benefits",
+  "tag": "div",
+  "class": "pv-section",
+  "settings": [
+    { "type": "range", "id": "interval", "label": "Seconds per feature", "min": 3, "max": 12, "step": 1, "unit": "s", "default": 5 },
+    {
+      "type": "text",
+      "id": "badge_icon",
+      "label": "Badge icon (Material Symbols name)",
+      "default": "verified"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge text",
+      "default": "Clean Performance"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (HTML allowed)",
+      "default": "Electrolyte Powder <span style=\"color: var(--pv-primary) !important;\">Plus™ Benefits</span>"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Electrolytes Powder Plus™ contains 1000 mg of potassium as opposed to only 250 mg in other brands. Additionally, we offer a unique flavor and blend of Magnesium, Calcium, and Pink Himalayan salt."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Product image"
+    },
+    {
+      "type": "text",
+      "id": "image_asset",
+      "label": "Product image fallback (theme asset filename)",
+      "default": "pv-unflavored-electrolytes-powder-plus-100-servings-image-1.jpg"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Product image alt text",
+      "default": "PowderVitamin Electrolyte Powder Plus Unflavored pouch with high potassium content"
+    },
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "Testimonial quote",
+      "default": "The only hydration that doesn't break my fast. Keeps my brain sharp during long work sessions and my energy levels consistent without a crash."
+    },
+    {
+      "type": "text",
+      "id": "initials",
+      "label": "Testimonial initials",
+      "default": "EW"
+    },
+    {
+      "type": "text",
+      "id": "author",
+      "label": "Testimonial author",
+      "default": "Emily W."
+    },
+    {
+      "type": "text",
+      "id": "role",
+      "label": "Testimonial role",
+      "default": "Registered Nurse"
+    },
+    {
+      "type": "text",
+      "id": "date",
+      "label": "Testimonial date",
+      "default": "Feb 2024"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "View All Reviews"
+    },
+    {
+      "type": "text",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "https://www.reviews.io/product-reviews/store/powdervitamin.com"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icon (Material Symbols name)"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    },
+    {
+      "type": "floating_card",
+      "name": "Floating card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label"
+        },
+        {
+          "type": "text",
+          "id": "position_style",
+          "label": "Position (inline CSS)"
+        },
+        {
+          "type": "checkbox",
+          "id": "animate",
+          "label": "Float animation",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Benefits",
+      "settings": {
+        "badge_icon": "verified",
+        "badge_text": "Clean Performance",
+        "heading": "Electrolyte Powder <span style=\"color: var(--pv-primary) !important;\">Plus™ Benefits</span>",
+        "description": "Electrolytes Powder Plus™ contains 1000 mg of potassium as opposed to only 250 mg in other brands. Additionally, we offer a unique flavor and blend of Magnesium, Calcium, and Pink Himalayan salt.",
+        "image_asset": "pv-unflavored-electrolytes-powder-plus-100-servings-image-1.jpg",
+        "image_alt": "PowderVitamin Electrolyte Powder Plus Unflavored pouch with high potassium content",
+        "quote": "The only hydration that doesn't break my fast. Keeps my brain sharp during long work sessions and my energy levels consistent without a crash.",
+        "initials": "EW",
+        "author": "Emily W.",
+        "role": "Registered Nurse",
+        "date": "Feb 2024",
+        "button_label": "View All Reviews",
+        "button_link": "https://www.reviews.io/product-reviews/store/powdervitamin.com"
+      },
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "timer_off",
+            "title": "STOP MUSCLE CRAMPS",
+            "text": "1000mg of Potassium per serving provides clinical strength to prevent and eliminate cramping during intense activity."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "bolt",
+            "title": "SUSTAINED ENERGY",
+            "text": "Avoid the mid-day crash. Our sugar-free formula stabilizes energy levels without insulin spikes."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "psychology",
+            "title": "SHARPER FOCUS",
+            "text": "Balanced electrolytes support neurological function, keeping you clear and locked in all day."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "rebase",
+            "title": "RAPID RECOVERY",
+            "text": "Magnesium and trace minerals from Pink Himalayan Salt accelerate post-workout repair."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "icon": "eco",
+            "title": "ZERO JUNK",
+            "text": "No maltodextrin, artificial colors, or synthetic fillers. Just pure mineral power."
+          }
+        },
+        {
+          "type": "floating_card",
+          "settings": {
+            "label": "0g sugar",
+            "position_style": "top: -1rem; left: -1rem;",
+            "animate": true
+          }
+        },
+        {
+          "type": "floating_card",
+          "settings": {
+            "label": "0g carbs",
+            "position_style": "top: 10%; right: -2rem;",
+            "animate": false
+          }
+        },
+        {
+          "type": "floating_card",
+          "settings": {
+            "label": "0 calories",
+            "position_style": "top: 35%; left: -5rem;",
+            "animate": true
+          }
+        },
+        {
+          "type": "floating_card",
+          "settings": {
+            "label": "Nothing Artificial",
+            "position_style": "top: 55%; right: -1.5rem;",
+            "animate": false
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

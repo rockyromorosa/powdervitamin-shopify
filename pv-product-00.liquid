@@ -1,0 +1,1131 @@
+{%- comment -%} Ported from powdervitamin.com (WordPress/Elementor). {%- endcomment -%}
+{%- comment -%} First paint renders the Shopify product (no "Loading..." placeholders); the page script refines it after. {%- endcomment -%}
+{%- liquid
+  assign pv_first_variant = product.selected_or_first_available_variant
+  assign pv_atc_state = 'instock'
+  assign pv_atc_label = 'ADD TO CART'
+  assign pv_atc_bg = 'var(--pv-primary)'
+  assign pv_atc_fg = '#000000'
+  if pv_first_variant.available == false
+    assign pv_atc_state = 'notify'
+    assign pv_atc_label = 'NOTIFY ME WHEN IN STOCK'
+  elsif pv_first_variant.inventory_management == 'shopify' and pv_first_variant.inventory_quantity <= 0
+    assign pv_atc_state = 'preorder'
+    assign pv_atc_label = 'PREORDER NOW'
+  endif
+-%}
+<div class="pv-scope">
+<script>
+  window.PV_PATH = '/products/' + PV.wooSlugFor({{ product.title | json }}, {{ product.handle | json }}, {{ product.selected_or_first_available_variant.title | json }}) + '/';
+</script>
+
+					
+	<meta charset="utf-8">
+	<meta content="width=device-width, initial-scale=1.0" name="viewport">
+	<title>Cart | PowderVitamin</title>
+	
+	
+	
+	
+	<script src="https://cdn.jsdelivr.net/gh/igorlino/elevatezoom-plus@1.2.3/src/jquery.ez-plus.js"></script>
+	<script id="tailwind-config">
+		tailwind.config = {
+			darkMode: "class",
+			theme: {
+				extend: {
+					colors: {
+						"primary": "var(--pv-primary)",
+						"background-light": "#ffffff",
+						"background-dark": "#0a0f0b",
+						"deep-black": "#000000",
+						"primary-dim": "var(--pv-primary)",
+						"on-surface": "#1B1C17",
+						"primary-fixed": "#c0fe60",
+						"inverse-primary": "#456900",
+						"on-secondary": "#505600",
+						"secondary-dim": "#d2dd52",
+						"error": "#BA1A1A",
+						"surface-variant": "#E1E4D5",
+						"surface-container-high": "#F2F4E9",
+						"tertiary-container": "#fdef58",
+						"on-tertiary-fixed": "#4b4600",
+						"on-primary": "#172700",
+						"outline": "#75796C",
+						"surface-tint": "var(--pv-primary)",
+						"tertiary-fixed": "#fdef58",
+						"primary": "var(--pv-primary)",
+						"surface-bright": "#F9FAF0",
+						"on-error": "#FFFFFF",
+						"on-tertiary-container": "#5f5800",
+						"inverse-on-surface": "#F2F4E9",
+						"on-secondary-container": "#f7ff98",
+						"on-surface-variant": "#44483D",
+						"surface-dim": "#D9DBD0",
+						"on-primary-fixed": "#314c00",
+						"primary-container": "#B6F44B",
+						"primary-fixed-dim": "#b3ef53",
+						"secondary-fixed-dim": "#d2dd52",
+						"on-primary-fixed-variant": "#476b00",
+						"on-secondary-fixed-variant": "#596000",
+						"outline-variant": "#C5C8BA",
+						"error-container": "#FFDAD6",
+						"surface": "#F9FAF0",
+						"on-background": "#1B1C17",
+						"surface-container-highest": "#E3E4D9",
+						"secondary-container": "#5c6300",
+						"on-error-container": "#410002",
+						"tertiary-fixed-dim": "#eee04b",
+						"inverse-surface": "#30312C",
+						"on-primary-container": "#172700",
+						"on-tertiary-fixed-variant": "#6a6200",
+						"on-tertiary": "#686100",
+						"surface-container": "#EDEEE4",
+						"tertiary-dim": "#eee04b",
+						"surface-container-lowest": "#FFFFFF",
+						"tertiary": "#fff9e4",
+						"surface-container-low": "#F4F5EB",
+						"secondary-fixed": "#e0eb5f",
+						"background": "#F9FAF0",
+						"error-dim": "#d53d18",
+						"on-secondary-fixed": "#3e4300",
+						"secondary": "#e0eb5f"
+					},
+					fontFamily: {
+						"body": ["var(--pv-font-body)"],
+						"label": ["var(--pv-font-body)"]
+					},
+					borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px" },
+				},
+			},
+		}
+	</script>
+	<style>
+		/* CSS Nuclear Shield for WordPress - RESTORED, CORRECTED & OPTIMIZED FOR WP ROCKET */
+		#pv-bundle-detail-root {
+			display: block !important;
+			box-sizing: border-box !important;
+			background-color: #ffffff !important;
+			background-image:
+				radial-gradient(at 0% 0%, rgba(var(--pv-primary-rgb), 0.12) 0px, transparent 50%),
+				radial-gradient(at 100% 0%, rgba(var(--pv-primary-rgb), 0.08) 0px, transparent 50%) !important;
+			/* Fade-in Safeguard: Immediate fallback to prevent invisibility under WP Rocket JS delay */
+			opacity: 1 !important;
+			transition: opacity 0.5s ease-in-out;
+		}
+
+		html.dark #pv-bundle-detail-root {
+			background-color: #0a0f0b !important;
+			background-image:
+				radial-gradient(at 0% 0%, rgba(var(--pv-primary-rgb), 0.2) 0px, transparent 50%),
+				radial-gradient(at 100% 100%, rgba(var(--pv-primary-rgb), 0.1) 0px, transparent 50%) !important;
+			color: #f1f5f9 !important;
+		}
+
+		/* Class added by JS once loading is done */
+		#pv-bundle-detail-root.content-ready {
+			opacity: 1 !important;
+		}
+
+		#pv-bundle-detail-root * {
+			box-sizing: border-box !important;
+		}
+
+		/* Heading Logic - Correct Weights for Titles Only */
+		#pv-bundle-detail-root h2,
+		#pv-bundle-detail-root h3,
+		#pv-bundle-detail-root .font-bebas {
+			font-family: var(--pv-font-heading) !important;
+			font-weight: 400 !important;
+			text-transform: uppercase !important;
+			margin: 0 !important;
+		}
+
+		/* Description Cards & Accordion Headings Protection - Forces Inter Font */
+		#pv-bundle-detail-root p,
+		#pv-bundle-detail-root label,
+		#pv-bundle-detail-root li,
+		#pv-bundle-detail-root h4,
+		#pv-bundle-detail-root h5,
+		#pv-bundle-detail-root h6,
+		#pv-bundle-detail-root #bundle-accordions h1,
+		#pv-bundle-detail-root #bundle-accordions h2,
+		#pv-bundle-detail-root #bundle-accordions h3,
+		#pv-bundle-detail-root #bundle-accordions h4,
+		#pv-bundle-detail-root #bundle-accordions h5,
+		#pv-bundle-detail-root #bundle-accordions h6,
+		#pv-bundle-detail-root #bundle-accordions summary span:not(.material-symbols-outlined),
+		#pv-bundle-detail-root .hero-hook-box-target h4,
+		#pv-bundle-detail-root .bundle-highlights-target h4 {
+			font-family: var(--pv-font-body) !important;
+		}
+
+		#pv-bundle-detail-root p,
+		#pv-bundle-detail-root label,
+		#pv-bundle-detail-root li {
+			font-weight: 500 !important;
+		}
+
+		#pv-bundle-detail-root span:not(.material-symbols-outlined) {
+			font-family: var(--pv-font-body) !important;
+		}
+
+		/* Material Symbols Font Protection & Ligature Safeguard */
+		#pv-bundle-detail-root .material-symbols-outlined,
+		#pv-bundle-detail-root span.material-symbols-outlined,
+		#pv-bundle-detail-root summary .material-symbols-outlined,
+		#pv-bundle-detail-root details summary .material-symbols-outlined {
+			font-family: 'Material Symbols Outlined' !important;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			text-transform: none !important;
+		}
+
+		/* Global Color Safeguard for Light Mode (Forces visibility of Slate-800 text) */
+		html:not(.dark) #pv-bundle-detail-root {
+			color: #0f172a !important;
+		}
+
+		html:not(.dark) #pv-bundle-detail-root p,
+		html:not(.dark) #pv-bundle-detail-root li,
+		html:not(.dark) #pv-bundle-detail-root label,
+		html:not(.dark) #pv-bundle-detail-root span:not(.text-primary):not(.material-symbols-outlined) {
+			color: #1e293b !important;
+		}
+
+		html:not(.dark) #breadcrumb-title {
+			color: #0f172a !important;
+			font-weight: 700 !important;
+		}
+
+		/* Text Colors for Dark Mode */
+		html.dark #pv-bundle-detail-root p,
+		html.dark #pv-bundle-detail-root span:not(.text-primary):not(.material-symbols-outlined),
+		html.dark #pv-bundle-detail-root h2,
+		html.dark #pv-bundle-detail-root h3,
+		html.dark #pv-bundle-detail-root li {
+			color: #f1f5f9 !important;
+		}
+
+		/* Explicit Weight Classes */
+		#pv-bundle-detail-root .font-black {
+			font-weight: 900 !important;
+		}
+
+		#pv-bundle-detail-root .font-bold {
+			font-weight: 700 !important;
+		}
+
+		/* Centering Material Icons */
+		#pv-bundle-detail-root .material-symbols-outlined {
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			font-family: 'Material Symbols Outlined' !important;
+		}
+
+		/* Radio Fix - Vertically Centered & Flex Uncompressed */
+		#pv-bundle-detail-root input[type="radio"] {
+			appearance: none !important;
+			-webkit-appearance: none !important;
+			width: 18px !important;
+			height: 18px !important;
+			min-width: 18px !important;
+			min-height: 18px !important;
+			border: 2px solid var(--pv-primary) !important;
+			border-radius: 50% !important;
+			background: transparent !important;
+			position: relative !important;
+			cursor: pointer !important;
+			outline: none !important;
+			margin: 0 !important;
+			flex-shrink: 0 !important;
+			align-self: center !important;
+		}
+
+		/* Radio Container Alignment Helper */
+		#pv-bundle-detail-root #selector-sub,
+		#pv-bundle-detail-root #selector-ot {
+			display: flex !important;
+			align-items: center !important;
+		}
+
+		#pv-bundle-detail-root input[type="radio"]:checked {
+			background-color: var(--pv-primary) !important;
+			box-shadow: inset 0 0 0 3px #ffffff !important;
+		}
+
+		html.dark #pv-bundle-detail-root input[type="radio"]:checked {
+			box-shadow: inset 0 0 0 3px #0a0f0b !important;
+		}
+
+		/* UI Helpers */
+		.glass-card {
+			background: rgba(255, 255, 255, 0.7) !important;
+			backdrop-filter: blur(12px) !important;
+			border: 1px solid rgba(var(--pv-primary-rgb), 0.2) !important;
+		}
+
+		html.dark .glass-card {
+			background: rgba(0, 0, 0, 0.4) !important;
+			border: 1px solid rgba(var(--pv-primary-rgb), 0.1) !important;
+		}
+
+		.amazon-badge {
+			background: #FF9900 !important;
+			color: white !important;
+			padding: 2px 6px !important;
+			border-radius: 4px !important;
+			font-size: 10px !important;
+			font-weight: bold !important;
+		}
+
+		.no-scrollbar::-webkit-scrollbar {
+			display: none !important;
+		}
+
+		.no-scrollbar {
+			-ms-overflow-style: none !important;
+			scrollbar-width: none !important;
+		}
+
+		body#pv-bundle-detail-root {
+			background-color: #ffffff !important;
+			background-image:
+				radial-gradient(at 0% 0%, rgba(var(--pv-primary-rgb), 0.12) 0px, transparent 50%),
+				radial-gradient(at 100% 0%, rgba(var(--pv-primary-rgb), 0.08) 0px, transparent 50%) !important;
+		}
+
+		/* Forces CTA text and price to remain black even in dark mode */
+		#pv-bundle-detail-root #atc-main,
+		#pv-bundle-detail-root #atc-main span,
+		html.dark #pv-bundle-detail-root #atc-main,
+		html.dark #pv-bundle-detail-root #atc-main span {
+			color: #000000 !important;
+		}
+
+		/* Forces Material Symbol stars to be filled and green */
+		#pv-bundle-detail-root .material-symbols-outlined.fill-current,
+		#pv-bundle-detail-root .text-primary .material-symbols-outlined {
+			font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 24 !important;
+			color: var(--pv-primary) !important;
+			/* Brand Green */
+		}
+
+		/* Ensure green color persists in dark mode */
+		html.dark #pv-bundle-detail-root .material-symbols-outlined.fill-current,
+		html.dark #pv-bundle-detail-root .text-primary .material-symbols-outlined {
+			color: var(--pv-primary) !important;
+		}
+
+		/* Ensure the zoom container doesn't block other UI elements */
+		.zoomContainer {
+			z-index: 20005 !important;
+			pointer-events: none;
+			/* Allows clicks to go through to arrows if needed */
+		}
+
+		/* Unified Lightbox Layout Fixes */
+		#review-lightbox {
+			z-index: 20000 !important;
+		}
+
+		#review-lightbox-media-container {
+			background: #000;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			min-height: 300px;
+		}
+
+		#lightbox-video-player {
+			width: 100%;
+			max-height: 70vh;
+			outline: none;
+		}
+
+		#main-product-img:not(.zoom-active) {
+			cursor: zoom-in !important;
+		}
+
+		/* Re-enable pointer events for the specific active zoom area */
+		.zoomContainer .zoomWindowContainer {
+			pointer-events: all;
+		}
+
+		/* Zoom Toggle Button Hidden */
+		#zoom-toggle-btn {
+			display: none !important;
+		}
+
+		/* Force Default Cursor when zoom is off */
+		#main-product-img {
+			cursor: default !important;
+		}
+
+		/* Force initial chip styles to bypass WordPress defaults */
+		#pv-bundle-detail-root .flavor-chip,
+		#pv-bundle-detail-root .size-chip {
+			border: 1px solid rgba(var(--pv-primary-rgb), 0.2) !important;
+			background-color: transparent !important;
+			color: #64748b !important;
+			/* Force gray text */
+		}
+
+		/* Force the "Selected" state for the default items and dynamic state changes */
+		#pv-bundle-detail-root .flavor-chip.border-2,
+		#pv-bundle-detail-root .flavor-chip.active-selection,
+		#pv-bundle-detail-root .size-chip.border-2,
+		#pv-bundle-detail-root .size-chip.active-selection {
+			border: 2px solid var(--pv-primary) !important;
+			background-color: rgba(var(--pv-primary-rgb), 0.05) !important;
+		}
+
+		#pv-bundle-detail-root .flavor-chip.border-2 span,
+		#pv-bundle-detail-root .flavor-chip.active-selection span,
+		#pv-bundle-detail-root .size-chip.border-2,
+		#pv-bundle-detail-root .size-chip.active-selection {
+			color: #0f172a !important;
+			/* Dark text */
+			font-weight: 900 !important;
+		}
+
+		html.dark #pv-bundle-detail-root .flavor-chip.border-2 span,
+		html.dark #pv-bundle-detail-root .flavor-chip.active-selection span,
+		html.dark #pv-bundle-detail-root .size-chip.border-2,
+		html.dark #pv-bundle-detail-root .size-chip.active-selection {
+			color: #ffffff !important;
+			/* White text in dark mode */
+		}
+
+		/* FALLBACK TWO-COLUMN GRID LAYOUT (Ensures 2 columns on desktop before Tailwind loads) */
+		@media (min-width: 1024px) {
+			#pv-bundle-detail-root .grid.grid-cols-1.lg\:grid-cols-12 {
+				display: grid !important;
+				grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+				gap: 3rem !important;
+			}
+
+			#pv-bundle-detail-root .lg\:col-span-7 {
+				grid-column: span 7 / span 7 !important;
+			}
+
+			#pv-bundle-detail-root .lg\:col-span-5 {
+				grid-column: span 5 / span 5 !important;
+			}
+		}
+
+		/* FAQ visibility fallback insurance */
+		#faq-container details {
+			display: block !important;
+			width: 100% !important;
+			visibility: visible !important;
+			opacity: 1 !important;
+		}
+
+		/* Loading Skeleton Masking Layer Animation */
+		.skeleton-loading {
+			position: relative;
+			color: transparent !important;
+			background-color: #e2e8f0 !important;
+			border-color: #e2e8f0 !important;
+			border-radius: 0.375rem !important;
+			overflow: hidden !important;
+			pointer-events: none !important;
+		}
+
+		html.dark .skeleton-loading {
+			background-color: #1e293b !important;
+			border-color: #1e293b !important;
+		}
+
+		.skeleton-loading::after {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			transform: translateX(-100%);
+			background-image: linear-gradient(90deg,
+					rgba(255, 255, 255, 0) 0%,
+					rgba(255, 255, 255, 0.2) 20%,
+					rgba(255, 255, 255, 0.6) 60%,
+					rgba(255, 255, 255, 0) 100%);
+			animation: skeleton-shimmer 2s infinite;
+			content: '';
+		}
+
+		html.dark .skeleton-loading::after {
+			background-image: linear-gradient(90deg,
+					rgba(255, 255, 255, 0) 0%,
+					rgba(255, 255, 255, 0.05) 20%,
+					rgba(255, 255, 255, 0.1) 60%,
+					rgba(255, 255, 255, 0) 100%);
+		}
+
+		@keyframes skeleton-shimmer {
+			100% {
+				transform: translateX(100%);
+			}
+		}
+		/* Sold-out flavor + size chips: greyed out but still clickable (they open the product page, which shows OUT OF STOCK).
+		   Non-existent combinations (.pv-chip-disabled) are inert: clicks are blocked in pv-product-00-1.js. */
+		.flavor-chip.pv-chip-disabled,
+		.size-chip.pv-chip-disabled,
+		.flavor-chip.pv-chip-soldout,
+		.size-chip.pv-chip-soldout {
+			opacity: 0.4 !important;
+			filter: grayscale(1) !important;
+			cursor: not-allowed !important;
+			border-style: dashed !important;
+			border-color: rgba(100, 116, 139, 0.45) !important;
+			background-color: transparent !important;
+			text-decoration: line-through !important;
+		}
+		.flavor-chip.pv-chip-soldout,
+		.size-chip.pv-chip-soldout { cursor: pointer !important; }
+		.flavor-chip.pv-chip-soldout:hover,
+		.size-chip.pv-chip-soldout:hover { opacity: 0.65 !important; }
+		.pv-chips-pending .flavor-chip,
+		.pv-chips-pending .size-chip { pointer-events: none; }
+	</style>
+
+
+
+
+	{%- comment -%} The fixed pv-navbar (h-20 + 1px border) floats over the page and #MainContent has no offset on pv-templates, so clear it here. {%- endcomment -%}
+	<div aria-hidden="true" style="height: calc(5rem + 1px);"></div>
+
+	<main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-6">
+		<!-- Breadcrumbs -->
+		<nav class="flex items-center gap-1 mb-2 sm:mb-3 text-[11px] sm:text-sm font-medium text-slate-500 dark:text-slate-400 overflow-x-auto no-scrollbar">
+			<a class="hover:text-primary transition-colors whitespace-nowrap" href="/pages/shop-all" style="text-decoration:none !important; color: inherit !important;">Shop All</a>
+			<span class="material-symbols-outlined text-[10px] sm:text-xs flex-shrink-0">chevron_right</span>
+			<a class="hover:text-primary transition-colors whitespace-nowrap" href="/pages/prehydrate-electrolytes" style="text-decoration:none !important; color: inherit !important;">Electrolytes Powder Plus™</a>
+			<span class="material-symbols-outlined text-[10px] sm:text-xs flex-shrink-0">chevron_right</span>
+			<span class="text-slate-900 dark:text-slate-100 font-bold whitespace-nowrap" id="breadcrumb-title">{{ product.title }}</span>
+		</nav>
+
+		<!-- Header & Hero Hook Above Image (VISIBLE ON MOBILE ONLY) -->
+		<div class="block lg:hidden space-y-2 sm:space-y-3 mb-3 sm:mb-5 max-w-4xl">
+			<!-- Product Title -->
+			<h2 class="font-bebas text-2xl sm:text-4xl font-normal tracking-tight leading-tight sm:leading-none uppercase text-slate-900 dark:text-white bundle-title-target">{{ product.title }}</h2>
+			
+			<!-- Ratings & Price Bar -->
+			<div class="flex flex-wrap items-center gap-2.5 sm:gap-4">
+				<!-- Ratings -->
+				<div class="flex items-center gap-1.5 sm:gap-2">
+					<div class="flex text-primary">
+						<span class="material-symbols-outlined fill-current text-xs sm:text-base icon-green-forced">star</span>
+						<span class="material-symbols-outlined fill-current text-xs sm:text-base icon-green-forced">star</span>
+						<span class="material-symbols-outlined fill-current text-xs sm:text-base icon-green-forced">star</span>
+						<span class="material-symbols-outlined fill-current text-xs sm:text-base icon-green-forced">star</span>
+						<span class="material-symbols-outlined fill-current text-xs sm:text-base icon-green-forced">star_half</span>
+					</div>
+					<span id="review-count-text-mobile" class="text-[11px] sm:text-sm font-semibold text-slate-600 dark:text-slate-300 underline decoration-primary/40 underline-offset-2 sm:underline-offset-4 cursor-pointer hover:text-primary transition-colors"></span>
+				</div>
+
+				<!-- Price Display -->
+				<div class="flex items-center gap-2 sm:gap-2.5">
+					<span class="text-xl sm:text-3xl font-black text-slate-900 dark:text-white display-price-target" style="font-weight:900 !important;">{{ pv_first_variant.price | money }}</span>
+					<span class="text-xs sm:text-lg text-slate-400 line-through strike-price-target"></span>
+					<span class="bg-primary/20 text-slate-900 dark:text-primary px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-black uppercase tracking-wider border border-primary/30 save-badge-target" style="font-weight:900 !important;"></span>
+				</div>
+			</div>
+
+			<!-- "Why Thirsty Is Too Late" Hero Hook Box -->
+			<div class="p-2.5 sm:p-3.5 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/25 shadow-sm relative overflow-hidden hero-hook-box-target">
+				<div class="flex items-start gap-2 sm:gap-2.5">
+					<span class="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/20 green-text-badge text-[10px] sm:text-xs font-black flex items-center justify-center border border-primary/40 shadow-sm mt-0.5" style="color: var(--pv-primary) !important; font-weight:900 !important;">01</span>
+					<div>
+						<h4 class="font-black text-[11px] sm:text-sm text-slate-900 dark:text-white uppercase tracking-wide mb-0.5 sm:mb-1" style="font-weight:900 !important;">Why Thirsty Is Too Late</h4>
+						<p class="text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+							Waiting until you feel thirsty means your body is already running at a deficit. Real energy and focus come from building your mineral baseline before demand begins. Every scoop of <strong class="text-slate-900 dark:text-white font-bold" style="font-weight:800 !important;">PREHYDRATE™</strong> delivers clean proactive preparation rich in potassium, essential magnesium, calcium, and Pink Himalayan salt.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Main 2-Column Responsive Grid -->
+		<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
+			
+			<!-- Left Column: Photo, Thumbnails & Desktop Benefit Icons -->
+			<div class="lg:col-span-6 space-y-2.5 sm:space-y-3">
+				<!-- Main Product Photo -->
+				<div class="aspect-square rounded-lg sm:rounded-xl overflow-hidden bg-primary/5 border border-primary/15 relative group shadow-sm" id="image-skeleton-wrapper">
+					<div class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10">
+						<span id="badge-main" class="bg-primary text-black font-black text-[8px] sm:text-[10px] px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full uppercase tracking-widest shadow-md" style="display: none; font-weight:900 !important;">50 SERVINGS POUCH</span>
+					</div>
+
+					<div id="zoom-toggle-btn" class="flex items-center justify-center" title="Click to Enable Zoom">
+						<span class="material-symbols-outlined" style="font-size: 24px !important;">zoom_in</span>
+					</div>
+
+					<img id="main-product-img" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src="" data-zoom-image="" alt="Product Image">
+					
+					<div id="gallery-prev" role="button" tabindex="0" class="flex items-center justify-center absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full text-white transition-all">
+						<span class="material-symbols-outlined">chevron_left</span>
+					</div>
+					<div id="gallery-next" role="button" tabindex="0" class="flex items-center justify-center absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full text-white transition-all">
+						<span class="material-symbols-outlined">chevron_right</span>
+					</div>
+				</div>
+
+				<!-- Thumbnails -->
+				<div class="flex gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar pb-0.5" id="gallery-thumbnails">
+					<!-- Populated by JS -->
+				</div>
+
+				<!-- DESKTOP BENEFIT ICONS (Positioned in Left Column below gallery on Desktop) -->
+				<div class="hidden lg:grid grid-cols-2 gap-2.5 sm:gap-3 pt-3 border-t border-primary/15" id="benefits-grid-desktop">
+					<!-- Populated by JS -->
+				</div>
+			</div>
+
+			<!-- Right Column: Buy Box -->
+			<div class="lg:col-span-6 space-y-3 sm:space-y-3.5 text-left">
+
+				<!-- DESKTOP HEADER & HERO HOOK BOX (VISIBLE ON DESKTOP ONLY) -->
+				<div class="hidden lg:block space-y-3 mb-3">
+					<h2 class="font-bebas text-4xl lg:text-5xl font-normal tracking-tight leading-none uppercase text-slate-900 dark:text-white bundle-title-target" id="bundle-title">{{ product.title }}</h2>
+					
+					<div class="flex items-center gap-4">
+						<div class="flex text-primary">
+							<span class="material-symbols-outlined fill-current text-base icon-green-forced">star</span>
+							<span class="material-symbols-outlined fill-current text-base icon-green-forced">star</span>
+							<span class="material-symbols-outlined fill-current text-base icon-green-forced">star</span>
+							<span class="material-symbols-outlined fill-current text-base icon-green-forced">star</span>
+							<span class="material-symbols-outlined fill-current text-base icon-green-forced">star_half</span>
+						</div>
+						<span id="review-count-text" class="text-sm font-semibold text-slate-600 dark:text-slate-300 underline decoration-primary/40 underline-offset-4 cursor-pointer hover:text-primary transition-colors"></span>
+					</div>
+
+					<div class="flex items-center gap-3">
+						<span id="display-price" class="text-3xl font-black text-slate-900 dark:text-white display-price-target" style="font-weight:900 !important;">{{ pv_first_variant.price | money }}</span>
+						<span id="strike-price" class="text-lg text-slate-400 line-through strike-price-target"></span>
+						<span id="save-badge" class="bg-primary/20 text-slate-900 dark:text-primary px-2.5 py-0.5 rounded-md text-xs font-black uppercase tracking-wider border border-primary/30 save-badge-target" style="font-weight:900 !important;"></span>
+					</div>
+
+					<div class="p-3.5 rounded-xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent border border-primary/25 shadow-sm relative overflow-hidden hero-hook-box-target">
+						<div class="flex items-start gap-2 sm:gap-2.5">
+							<span class="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-primary/20 green-text-badge text-[10px] sm:text-xs font-black flex items-center justify-center border border-primary/40 shadow-sm mt-0.5" style="color: var(--pv-primary) !important; font-weight:900 !important;">01</span>
+							<div>
+								<h4 class="font-black text-[11px] sm:text-sm text-slate-900 dark:text-white uppercase tracking-wide mb-0.5 sm:mb-1" style="font-weight:900 !important;">Why Thirsty Is Too Late</h4>
+								<p class="text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+									Waiting until you feel thirsty means your body is already running at a deficit. Real energy and focus come from building your mineral baseline before demand begins. Every scoop of <strong class="text-slate-900 dark:text-white font-bold" style="font-weight:800 !important;">PREHYDRATE™</strong> delivers clean proactive preparation rich in potassium, essential magnesium, calcium, and Pink Himalayan salt.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Hidden element to prevent JS null errors for legacy bundle-desc -->
+				<p id="bundle-desc" class="hidden"></p>
+
+				<!-- Key Conversion Highlights (01, 02, 03 Cards) -->
+				<div class="bundle-highlights-target space-y-1.5 sm:space-y-2 pt-0.5">
+					<div class="space-y-1.5 sm:space-y-2">
+						<p class="font-black text-[9px] sm:text-[10px] uppercase tracking-widest text-slate-500 dark:text-slate-400 pl-0.5" style="font-weight:900 !important;">Key Value &amp; Conversion Highlights</p>
+						
+						<div class="grid grid-cols-1 gap-1.5 sm:gap-2">
+							<div class="flex items-start gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-white/5 border border-primary/20 transition-all hover:border-primary/40 shadow-sm">
+								<span class="flex-shrink-0 w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-primary/20 green-text-badge text-[9px] sm:text-[10px] font-black flex items-center justify-center border border-primary/30 mt-0.5" style="color: var(--pv-primary) !important; font-weight:900 !important;">01</span>
+								<p class="text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+									<strong class="text-slate-900 dark:text-white font-bold" style="font-weight:700 !important;">50 Servings of Optimal Hydration:</strong> Maximizes your daily value with 50 full servings per pouch built for long term habit building.
+								</p>
+							</div>
+
+							<div class="flex items-start gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-white/5 border border-primary/20 transition-all hover:border-primary/40 shadow-sm">
+								<span class="flex-shrink-0 w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-primary/20 green-text-badge text-[9px] sm:text-[10px] font-black flex items-center justify-center border border-primary/30 mt-0.5" style="color: var(--pv-primary) !important; font-weight:900 !important;">02</span>
+								<p class="text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+									<strong class="text-slate-900 dark:text-white font-bold" style="font-weight:700 !important;">Rich In Potassium Baseline:</strong> Packed with clean essential minerals and zero sugar, zero maltodextrin, and zero artificial fillers.
+								</p>
+							</div>
+
+							<div class="flex items-start gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-slate-50 dark:bg-white/5 border border-primary/20 transition-all hover:border-primary/40 shadow-sm">
+								<span class="flex-shrink-0 w-4.5 h-4.5 sm:w-5 sm:h-5 rounded-full bg-primary/20 green-text-badge text-[9px] sm:text-[10px] font-black flex items-center justify-center border border-primary/30 mt-0.5" style="color: var(--pv-primary) !important; font-weight:900 !important;">03</span>
+								<p class="text-[11px] sm:text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+									<strong class="text-slate-900 dark:text-white font-bold" style="font-weight:700 !important;">Pure Formula:</strong> Completely sugar free and keto friendly to protect your momentum before fatigue sets in.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Badges -->
+				<div class="flex flex-wrap gap-1.5 sm:gap-2" id="variant-badges">
+					<!-- Populated by JS -->
+				</div>
+
+				<!-- Includes List -->
+				<div class="space-y-1 sm:space-y-1.5">
+					<span class="font-black text-[10px] sm:text-[11px] uppercase tracking-widest text-primary flex items-center gap-1" style="font-weight:900 !important; color:var(--pv-primary) !important;">
+						<span class="material-symbols-outlined text-xs sm:text-sm icon-green-forced">checklist</span>
+						INCLUDES:
+					</span>
+					<ul id="includes-list" class="grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-1.5 text-[11px] sm:text-xs">
+						<!-- Populated by JS -->
+					</ul>
+				</div>
+
+				<!-- Product Options Config Section -->
+				<div class="space-y-3 sm:space-y-3.5 py-2.5 sm:py-3 border-t border-primary/15">
+					
+					<!-- Select Flavor -->
+					<div class="space-y-1.5 sm:space-y-2">
+						<div class="flex justify-between items-center">
+							<label class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400" style="font-weight:900 !important;">Select Flavor</label>
+							<span class="text-[11px] sm:text-xs font-bold text-primary uppercase tracking-wider" id="selected-flavor-label" style="color:var(--pv-primary) !important;">Lemonade</span>
+						</div>
+						<div class="flex flex-wrap gap-1.5 sm:gap-2" id="all-flavors-container">
+							<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border-2 border-primary bg-primary/5 cursor-pointer transition-all" data-flavor="Lemonade">
+								<div class="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.5)]"></div>
+								<span class="text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white" style="font-weight:700 !important;">Lemonade</span>
+							</div>
+							<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Watermelon">
+								<div class="w-3 h-3 rounded-full bg-red-500"></div>
+								<span class="text-[11px] sm:text-xs font-bold text-slate-500">Watermelon</span>
+							</div>
+							<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Orange Pineapple">
+								<div class="w-3 h-3 rounded-full bg-orange-500"></div>
+								<span class="text-[11px] sm:text-xs font-bold text-slate-500">Orange Pineapple</span>
+							</div>
+							<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Raspberry">
+								<div class="w-3 h-3 rounded-full bg-pink-400"></div>
+								<span class="text-[11px] sm:text-xs font-bold text-slate-500">Raspberry</span>
+							</div>
+
+							<div class="hidden flex flex-wrap gap-1.5 sm:gap-2 w-full" id="extra-flavors">
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Raspberry Lemonade">
+									<div class="w-3 h-3 rounded-full bg-pink-300"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Raspberry Lemonade</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Mango Passionfruit">
+									<div class="w-3 h-3 rounded-full bg-orange-400"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Mango Passionfruit</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Blueberry Grape">
+									<div class="w-3 h-3 rounded-full bg-purple-600"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Blueberry Grape</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Strawberry Cucumber">
+									<div class="w-3 h-3 rounded-full bg-red-300"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Strawberry Cucumber</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Guava Kiwi">
+									<div class="w-3 h-3 rounded-full bg-pink-500"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Guava Kiwi</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Tangerine Pineapple">
+									<div class="w-3 h-3 rounded-full bg-orange-300"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Tangerine Pineapple</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Unflavored">
+									<div class="w-3 h-3 rounded-full bg-slate-200"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Unflavored</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Grape">
+									<div class="w-3 h-3 rounded-full bg-purple-800"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Grape</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Hibiscus">
+									<div class="w-3 h-3 rounded-full bg-red-700"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Hibiscus</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Strawberry Kiwi">
+									<div class="w-3 h-3 rounded-full bg-red-400"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Strawberry Kiwi</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Strawberry">
+									<div class="w-3 h-3 rounded-full bg-red-600"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Strawberry</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Black Tea Lemonade">
+									<div class="w-3 h-3 rounded-full bg-amber-900"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Black Tea Lemonade</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Black Tea Ginseng">
+									<div class="w-3 h-3 rounded-full bg-yellow-900"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Black Tea Ginseng</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Green Tea Ginseng">
+									<div class="w-3 h-3 rounded-full bg-emerald-800"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Green Tea Ginseng</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Black Tea Hibiscus">
+									<div class="w-3 h-3 rounded-full bg-red-900"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Black Tea Hibiscus</span>
+								</div>
+								<div role="button" class="flavor-chip group flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full border border-primary/10 hover:border-primary/30 cursor-pointer transition-all" data-flavor="Unsweetened Organic Black Tea">
+									<div class="w-3 h-3 rounded-full bg-stone-900"></div>
+									<span class="text-[11px] sm:text-xs font-bold text-slate-500">Unsweetened Organic Black Tea</span>
+								</div>
+							</div>
+						</div>
+
+						<div role="button" class="mt-2 px-3 py-1.5 rounded-full border border-primary/20 text-[10px] font-black uppercase tracking-widest hover:bg-primary/10 hover:border-primary cursor-pointer flex items-center gap-1.5 w-fit" id="view-more-flavors">
+							<span>View More</span>
+							<span class="material-symbols-outlined text-[14px]">expand_more</span>
+						</div>
+					</div>
+
+					<!-- Select Size -->
+					<div class="space-y-1.5 sm:space-y-2">
+						<label class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400" style="font-weight:900 !important;">Select Size</label>
+						<div class="flex flex-wrap gap-1.5 sm:gap-2">
+							<div role="button" class="size-chip active-selection px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg border-2 border-primary text-[11px] sm:text-xs font-bold cursor-pointer transition-all">
+								50 Servings
+							</div>
+							<div role="button" class="size-chip px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-primary/20 text-[11px] sm:text-xs font-bold cursor-pointer transition-all hover:border-primary/50">
+								100 servings
+							</div>
+							<div role="button" class="size-chip px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-primary/20 text-[11px] sm:text-xs font-bold cursor-pointer transition-all hover:border-primary/50">
+								20 Servings
+							</div>
+						</div>
+					</div>
+
+					<!-- Purchase Type Selector Cards -->
+					<div class="space-y-1.5 sm:space-y-2">
+						<label class="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400" style="font-weight:900 !important;">Purchase Type</label>
+						<div class="space-y-1.5 sm:space-y-2">
+							
+							<!-- Subscription Option -->
+							<div id="selector-sub" role="button" class="relative flex items-center p-2.5 sm:p-3 rounded-lg sm:rounded-xl border border-primary/10 hover:border-primary/40 cursor-pointer group transition-all">
+								<input class="text-primary focus:ring-primary h-4 w-4 flex-shrink-0 self-center pointer-events-none" name="purchase_type" type="radio" value="subscription">
+								<div class="ml-2.5 sm:ml-3 flex flex-1 items-center justify-between">
+									<div>
+										<span class="block text-[11px] sm:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white" style="font-weight:700 !important;">Monthly Subscription</span>
+										<span class="block text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Free shipping + Swap or cancel anytime</span>
+									</div>
+									<div class="text-right">
+										<span id="sub-price-val" class="block text-sm sm:text-lg font-bold text-primary">$31.44</span>
+										<span class="block text-[8px] sm:text-[9px] font-bold uppercase text-primary tracking-widest">Save 15% Total</span>
+									</div>
+								</div>
+							</div>
+
+							<!-- One-Time Purchase Option -->
+							<div id="selector-ot" role="button" class="relative flex items-center p-2.5 sm:p-3 rounded-lg sm:rounded-xl border-2 border-primary bg-primary/5 cursor-pointer group transition-all">
+								<input checked="" class="text-primary focus:ring-primary h-4 w-4 flex-shrink-0 self-center pointer-events-none" name="purchase_type" type="radio" value="one-time">
+								<div class="ml-2.5 sm:ml-3 flex flex-1 items-center justify-between">
+									<div>
+										<span class="block text-[11px] sm:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white" style="font-weight:700 !important;">One-Time Purchase</span>
+										<span class="block text-[10px] sm:text-[11px] text-slate-500 mt-0.5">Standard single order</span>
+									</div>
+									<div class="text-right">
+										<span id="ot-price-val" class="block text-sm sm:text-lg font-bold">$36.99</span>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+					<div class="flex items-center justify-between py-3 border-y border-primary/10">
+						<span class="text-xs font-black uppercase tracking-widest text-slate-400" style="font-weight:900 !important;">Quantity</span>
+						<div class="flex items-center bg-slate-100 dark:bg-white/5 rounded-lg border border-primary/10 p-1">
+							<div id="qty-minus" role="button" tabindex="0" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:text-primary transition-colors text-slate-500 hover:bg-primary/5 rounded-md cursor-pointer">
+								<span class="material-symbols-outlined text-sm">remove</span>
+							</div>
+							<span id="qty-val" class="w-8 sm:w-10 text-center font-bold text-base sm:text-lg">1</span>
+							<div id="qty-plus" role="button" tabindex="0" class="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:text-primary transition-colors text-slate-500 hover:bg-primary/5 rounded-md cursor-pointer">
+								<span class="material-symbols-outlined text-sm">add</span>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+				<!-- Add to Cart CTA Button -->
+				<div id="atc-main" role="button" tabindex="0" class="w-full bg-primary hover:bg-primary/90 text-deep-black font-bebas text-3xl py-4 rounded-xl tracking-wider transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer" style="background-color: {{ pv_atc_bg }} !important; color: {{ pv_atc_fg }} !important;" data-state="{{ pv_atc_state }}">
+					{{ pv_atc_label }}
+				</div>
+
+				<!-- MOBILE BENEFIT ICONS (3 on top, 2 on bottom centered, smaller size - MOBILE ONLY) -->
+				<div class="block lg:hidden pt-1.5 sm:pt-2 pb-0.5 sm:pb-1" id="benefits-grid-mobile">
+					<!-- Populated by JS -->
+				</div>
+
+				<!-- Collapsible Accordion (Long Description & Details) -->
+				<div id="bundle-accordions" class="space-y-1 sm:space-y-1.5 pt-2 border-t border-primary/10 text-left">
+					<!-- Populated by JS -->
+				</div>
+			</div>
+		</div>
+	</main>
+	<div id="pv-dynamic-reviews-mount"></div>
+	<section style="display:none;" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-primary/10">
+		<!-- Header/Summary -->
+		<div class="grid lg:grid-cols-12 gap-8 items-center mb-12 bg-white/5 p-6 rounded-2xl border border-primary/10 glass-card">
+			<div class="lg:col-span-3 space-y-2 border-r border-primary/10">
+				<h3 id="rating-avg" class="font-bebas text-5xl font-normal tracking-tighter leading-none" style="font-weight:400 !important;"></h3>
+				<div class="flex text-primary">
+					<span class="material-symbols-outlined fill-current text-sm">star</span><span class="material-symbols-outlined fill-current text-sm">star</span><span class="material-symbols-outlined fill-current text-sm">star</span><span class="material-symbols-outlined fill-current text-sm">star</span><span class="material-symbols-outlined fill-current text-sm">star_half</span>
+				</div>
+				<p id="amazon-rating-label" class="text-[10px] font-black uppercase tracking-widest text-slate-500" style="font-weight:900 !important;"></p>
+			</div>
+			<div class="lg:col-span-5 space-y-2" id="rating-bars">
+				<!-- Star Progress Bars (Remained Divs) -->
+				<div class="flex items-center gap-3"><span class="text-[10px] font-bold w-4">5</span>
+					<div class="flex-1 h-1.5 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
+						<div class="h-full bg-primary w-[88%]"></div>
+					</div><span class="text-[10px] text-slate-500 w-8 text-right">88%</span>
+				</div>
+				<div class="flex items-center gap-3"><span class="text-[10px] font-bold w-4">4</span>
+					<div class="flex-1 h-1.5 bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
+						<div class="h-full bg-primary w-[8%]"></div>
+					</div><span class="text-[10px] text-slate-500 w-8 text-right">8%</span>
+				</div>
+			</div>
+			<div class="lg:col-span-4 flex flex-col justify-center border-l border-primary/10 pl-8">
+				<p class="text-primary font-bold text-sm italic mb-2">98% of customers recommend this
+					bundle</p>
+				<div class="flex gap-6">
+					<div>
+						<p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+							Verified Reviews</p>
+						<p id="stat-verified" class="text-sm font-bold"></p>
+					</div>
+					<div>
+						<p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+							Total Orders</p>
+						<p id="stat-orders" class="text-sm font-bold"></p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- UGC Gallery -->
+		<div class="relative group mb-12">
+			<div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 scroll-smooth" id="video-carousel">
+			</div>
+			<div role="button" tabindex="0" class="flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white dark:bg-slate-800 border border-primary/10 rounded-full text-slate-500 hover:text-primary shadow-lg transition-all z-10 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 cursor-pointer" onclick="scrollCarousel(-1)">
+				<span class="material-symbols-outlined">chevron_left</span>
+			</div>
+			<div role="button" tabindex="0" class="flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white dark:bg-slate-800 border border-primary/10 rounded-full text-slate-500 hover:text-primary shadow-lg transition-all z-10 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 cursor-pointer" onclick="scrollCarousel(1)">
+				<span class="material-symbols-outlined">chevron_right</span>
+			</div>
+		</div>
+
+		<!-- Reviews Feed -->
+		<div class="space-y-12">
+			<div id="reviews-feed-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			</div>
+
+			<div id="review-pagination" class="flex items-center justify-center gap-2 pt-8 border-t border-primary/10">
+			</div>
+		</div>
+	</section>
+
+	<!-- FAQ Section -->
+	<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-primary/10">
+		<h3 class="font-bebas text-5xl font-normal tracking-tight mb-12 uppercase">Frequently Asked Questions
+		</h3>
+		<div class="space-y-4 text-left" id="faq-container">
+			<!-- Populated by JS -->
+		</div>
+	</section>
+
+	<!-- Theme Toggle -->
+	<div class="fixed top-8 right-8 z-50">
+		<div id="theme-toggle" role="button" tabindex="0" class="flex items-center justify-center w-12 h-12 rounded-full bg-slate-200 dark:bg-white/10 border border-primary/20 hover:bg-primary transition-all duration-300 group cursor-pointer" onclick="document.documentElement.classList.toggle('dark')">
+			<span class="material-symbols-outlined text-on-surface group-hover:text-on-primary" data-icon="dark_mode">dark_mode</span>
+		</div>
+	</div>
+
+	<!-- Cart Sidebar Overlay -->
+	<div class="fixed inset-0 bg-background-dark/60 backdrop-blur-sm z-[100000] opacity-0 pointer-events-none transition-opacity duration-300" id="cart-sidebar-overlay"></div>
+
+	<!-- Cart Sidebar -->
+	<aside class="fixed right-0 top-0 h-full w-full max-w-md bg-background-light dark:bg-background-dark z-[100001] translate-x-full transition-transform duration-300 shadow-2xl border-l border-primary/10 flex flex-col" id="cart-sidebar">
+		<div class="p-6 border-b border-primary/10 flex items-center justify-between">
+			<div class="flex items-center gap-3">
+				<span class="material-symbols-outlined text-primary">shopping_bag</span>
+				<h3 class="font-bebas text-3xl tracking-tight uppercase" style="font-weight:400 !important;">Your Cart</h3>
+			</div>
+			<div id="close-cart" role="button" class="flex items-center justify-center p-0 m-0 w-10 h-10 hover:bg-primary/10 rounded-full transition-colors cursor-pointer border-none bg-transparent min-w-0 shadow-none">
+				<span class="material-symbols-outlined">close</span>
+			</div>
+		</div>
+		<div class="flex-1 overflow-y-auto p-6 space-y-6">
+			<div class="flex gap-4">
+				<div class="w-24 h-24 rounded-lg bg-primary/5 border border-primary/10 overflow-hidden flex-shrink-0">
+					<img id="cart-thumb" class="w-full h-full object-cover" src="">
+				</div>
+				<div class="flex-1 text-left">
+					<p id="cart-title" class="font-bold text-sm uppercase" style="font-weight:700 !important;"></p>
+					<p id="cart-purchase-type" class="text-xs text-slate-500 uppercase tracking-widest mt-1">One-Time Purchase</p>
+					<div class="flex items-center justify-between mt-4">
+						<span id="cart-price" class="text-primary font-bold" style="font-weight:700 !important;"></span>
+						<div class="flex items-center gap-3">
+							<div class="flex items-center bg-slate-100 dark:bg-white/5 border border-primary/10">
+								<button class="px-2 py-1 hover:text-primary">-</button>
+								<span class="px-2 font-bold text-xs" style="font-weight:700 !important;">1</span>
+								<button class="px-2 py-1 hover:text-primary">+</button>
+							</div>
+							<button class="flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors">
+								<span class="material-symbols-outlined text-lg">delete</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="p-6 border-t border-primary/10 space-y-4 bg-slate-50 dark:bg-primary/5">
+			<div class="flex justify-between items-center">
+				<span class="text-sm font-bold uppercase tracking-widest" style="font-weight:700 !important;">Subtotal</span>
+				<span id="cart-subtotal" class="text-2xl font-bold" style="font-weight:700 !important;"></span>
+			</div>
+			<a href="/cart" class="w-full bg-primary text-deep-black font-bebas text-2xl py-4 rounded-none tracking-wider hover:bg-primary/90 transition-all flex items-center justify-center" style="background-color: var(--pv-primary) !important; text-decoration: none !important; color: #000 !important;">
+				VIEW FULL CART
+			</a>
+			<p class="text-[10px] text-center text-slate-500 uppercase font-bold tracking-widest" style="font-weight:700 !important;">Shipping &amp; taxes calculated at checkout</p>
+		</div>
+	</aside>
+
+	{%- liquid
+		assign pv_variant = product.selected_or_first_available_variant
+	-%}
+	<script>
+		window.PV_SHOPIFY_PRODUCT = {
+			handle: {{ product.handle | json }},
+			variantId: {{ pv_variant.id | json }},
+			title: {{ product.title | json }},
+			description: {{ product.description | strip_html | strip | json }},
+			price: {{ pv_variant.price | json }},
+			compareAtPrice: {{ pv_variant.compare_at_price | default: 0 | json }},
+			images: [
+				{%- for image in product.images -%}
+					{{ image | image_url: width: 1200 | json }}{% unless forloop.last %},{% endunless %}
+				{%- endfor -%}
+			]
+		};
+	</script>
+	{%- comment -%} Theme editor settings and blocks for this template (see the schema below), applied in pv-product-00-1.js. {%- endcomment -%}
+	<script>
+		window.PV_PRODUCT_OVERRIDES = {
+			servingsLabel: {{ section.settings.servings_label | json }},
+			copySource: {{ section.settings.copy_source | json }},
+			subscriptionDiscount: {{ section.settings.subscription_discount | json }},
+			badges: [{%- for block in section.blocks -%}{%- if block.type == 'badge' and block.settings.text != blank -%}{{ block.settings.text | json }},{%- endif -%}{%- endfor -%}],
+			includes: [{%- for block in section.blocks -%}{%- if block.type == 'include' and block.settings.text != blank -%}{{ block.settings.text | json }},{%- endif -%}{%- endfor -%}],
+			benefits: [{%- for block in section.blocks -%}{%- if block.type == 'benefit' -%}{ icon: {{ block.settings.icon | json }}, label: {{ block.settings.label | json }}, sub: {{ block.settings.sub | json }} },{%- endif -%}{%- endfor -%}],
+			faqs: [{%- for block in section.blocks -%}{%- if block.type == 'faq' and block.settings.question != blank -%}{ q: {{ block.settings.question | json }}, a: {{ block.settings.answer | json }} },{%- endif -%}{%- endfor -%}],
+			accordions: [{%- for block in section.blocks -%}{%- if block.type == 'accordion' and block.settings.title != blank -%}{ title: {{ block.settings.title | json }}, content: {{ block.settings.content | json }}, open: {{ block.settings.open | json }} },{%- endif -%}{%- endfor -%}]
+		};
+	</script>
+	{% render 'pv-product-meta' %}
+	{% render 'pv-product-db-100' %}
+	<script src="{{ 'pv-product-00-1.js' | asset_url }}"></script>
+	<!-- UNIFIED EMAIL CAPTURE MODAL FOR OUT-OF-STOCK NON-CORE FLAVORS -->
+	<div id="simple-modal-container" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100000] hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0" onclick="handleOutsideClick(event)" style="display: none; align-items: center; justify-content: center;">
+		<div class="relative scale-95" id="modal-card" style="width: 100% !important; max-width: 540px !important; padding: 48px !important; border-radius: 28px !important; text-align: center !important; background: radial-gradient(circle at 10% 20%, rgba(var(--pv-primary-rgb), 0.15) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(var(--pv-primary-rgb), 0.1) 0%, transparent 50%), #ffffff !important; background-color: #ffffff !important; border: 2px solid rgba(var(--pv-primary-rgb), 0.3) !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 40px rgba(var(--pv-primary-rgb), 0.15) !important; box-sizing: border-box !important; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;">
+
+			<button onclick="closeSimpleModal()" class="absolute cursor-pointer" style="top: 20px !important; right: 20px !important; color: #94a3b8 !important; background: transparent !important; border: none !important; outline: none !important; padding: 4px !important; z-index: 50 !important;">
+				<span class="material-symbols-outlined" style="font-size: 24px !important;">close</span>
+			</button>
+
+			<div style="width: 56px !important; height: 56px !important; background-color: rgba(var(--pv-primary-rgb), 0.15) !important; border: 1px solid rgba(var(--pv-primary-rgb), 0.3) !important; border-radius: 9999px !important; display: flex !important; align-items: center !important; justify-content: center !important; margin-left: auto !important; margin-right: auto !important; margin-bottom: 20px !important;">
+				<span class="material-symbols-outlined" style="color: #000000 !important; font-size: 26px !important;">mail</span>
+			</div>
+
+			<h4 style="font-family: var(--pv-font-heading) !important; font-size: 42px !important; font-weight: 400 !important; color: #000000 !important; text-transform: uppercase !important; margin-top: 0 !important; margin-bottom: 8px !important; line-height: 1 !important; letter-spacing: 0.02em !important;">
+				Get Notified</h4>
+			<p style="font-family: var(--pv-font-body) !important; font-size: 14px !important; color: #475569 !important; font-weight: 500 !important; line-height: 1.5 !important; margin-top: 0 !important; margin-bottom: 28px !important; padding-left: 10px !important; padding-right: 10px !important;">
+				Enter your email below to get notified as soon as <span id="modal-flavor-name" style="font-weight: 700 !important; color: #000000 !important;">this
+					flavor</span> is back in stock.</p>
+
+			<div class="space-y-4" id="modal-form" style="width: 100% !important; box-sizing: border-box !important;">
+				<input type="email" id="modal-email" placeholder="Enter your email address" style="width: 100% !important; background-color: #f8fafc !important; border: 1px solid #cbd5e1 !important; border-radius: 12px !important; padding: 14px 16px !important; font-family: var(--pv-font-body) !important; font-size: 14px !important; color: #000000 !important; transition: all 0.2s ease !important; outline: none !important; box-sizing: border-box !important;">
+				<button onclick="submitSimpleModal()" style="width: 100% !important; background-color: var(--pv-primary) !important; color: #000000 !important; font-family: var(--pv-font-heading) !important; font-size: 24px !important; font-weight: 400 !important; text-transform: uppercase !important; border: none !important; border-radius: 12px !important; padding-top: 14px !important; padding-bottom: 14px !important; cursor: pointer !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; box-shadow: 0 4px 14px rgba(var(--pv-primary-rgb), 0.3) !important; transition: all 0.2s ease !important;">
+					Notify Me
+				</button>
+			</div>
+
+			<div id="modal-success" class="hidden" style="display: none; text-align: center !important; padding-top: 16px !important; padding-bottom: 16px !important;">
+				<span class="material-symbols-outlined" style="font-size: 56px !important; color: var(--pv-primary) !important; margin-bottom: 12px !important; display: inline-block !important;">check_circle</span>
+				<p style="font-family: var(--pv-font-heading) !important; font-size: 32px !important; font-weight: 400 !important; color: #000000 !important; text-transform: uppercase !important; margin: 0 !important; line-height: 1 !important;">
+					You're on the list!</p>
+				<p style="font-family: var(--pv-font-body) !important; font-size: 13px !important; color: #64748b !important; margin-top: 6px !important; margin-bottom: 0 !important; font-weight: 500 !important;">
+					We'll email you the second it's back in stock.</p>
+			</div>
+		</div>
+	</div>
+
+	<!-- DYNAMIC NOTIFICATION SYSTEM TOAST -->
+	<div id="custom-toast" class="fixed bottom-6 right-6 z-[200000] translate-y-20 opacity-0 bg-slate-900 text-white border border-brand/30 px-6 py-4 rounded-2xl flex items-center gap-3 shadow-2xl transition-all duration-300 max-w-sm pointer-events-none">
+		<span class="material-symbols-outlined text-brand" id="toast-icon">check_circle</span>
+		<div class="text-left">
+			<p class="font-black font-bebas text-lg uppercase tracking-wider text-brand leading-none" id="toast-title">ALERT SAVED</p>
+			<p class="text-xs text-slate-300 mt-1" id="toast-body">We've saved your request.</p>
+		</div>
+	</div>
+
+	<div id="review-lightbox" class="fixed inset-0 z-[20000] bg-black/95 backdrop-blur-sm hidden flex-col items-center justify-center p-4">
+		<div id="close-lightbox" role="button" class="absolute top-6 right-6 text-white hover:text-primary transition-colors cursor-pointer z-[20002] w-10 h-10 flex items-center justify-center bg-transparent border-none p-0 m-0 min-w-0 min-h-0 shadow-none">
+			<span class="material-symbols-outlined" style="font-size: 32px !important;">close</span>
+		</div>
+
+		<div class="relative max-w-4xl w-full flex items-center justify-center group">
+			<div id="lightbox-prev" role="button" class="absolute left-4 lg:-left-16 p-2 bg-white/10 hover:bg-primary rounded-full text-white transition-all opacity-100 lg:opacity-0 group-hover:opacity-100 cursor-pointer z-[20002] w-10 h-10 flex items-center justify-center border-none m-0 min-w-0 shadow-none">
+				<span class="material-symbols-outlined">chevron_left</span>
+			</div>
+
+			<div id="review-lightbox-media-container" class="relative overflow-hidden rounded-lg shadow-2xl w-full">
+				<div id="lightbox-zoom-btn" role="button" class="absolute bottom-4 right-4 z-[20003] flex items-center justify-center bg-white/90 text-black w-10 h-10 rounded-full border border-primary/40 hover:bg-primary transition-all cursor-pointer p-0 m-0 min-w-0 min-h-0 shadow-none">
+					<span class="material-symbols-outlined" style="font-size: 20px !important;">zoom_in</span>
+				</div>
+
+				<img id="lightbox-main-img" class="max-h-[70vh] w-full object-contain select-none" src="" data-zoom-image="">
+
+				<video id="lightbox-video-player" class="hidden" controls="" autoplay="" playsinline="">
+					<source src="" type="video/mp4">
+				</video>
+			</div>
+
+			<div id="lightbox-next" role="button" class="absolute right-4 lg:-right-16 p-2 bg-white/10 hover:bg-primary rounded-full text-white transition-all opacity-100 lg:opacity-0 group-hover:opacity-100 cursor-pointer z-[20002] w-10 h-10 flex items-center justify-center border-none m-0 min-w-0 shadow-none">
+				<span class="material-symbols-outlined">chevron_right</span>
+			</div>
+		</div>
+
+		<div id="lightbox-thumbs" class="flex gap-3 mt-8 overflow-x-auto no-scrollbar max-w-full px-4"></div>
+	</div>
+</div>
+
+{% schema %}
+{
+  "name": "PV Product 00",
+  "tag": "div",
+  "class": "pv-section",
+  "settings": [
+    { "type": "paragraph", "content": "Product copy, badges, ingredients, benefits and FAQs come from the built-in PowderVitamin product data. Blocks added here replace that list on this template." },
+    { "type": "text", "id": "servings_label", "label": "Servings badge", "info": "Replaces the servings badge (e.g. 100 Servings). Empty keeps the product data's badge." },
+    { "type": "select", "id": "copy_source", "label": "Title and description", "default": "auto", "options": [
+      { "value": "auto", "label": "Auto (Shopify product if size has no data)" },
+      { "value": "shopify", "label": "Always the Shopify product" },
+      { "value": "database", "label": "Always the product data" }
+    ] },
+    { "type": "range", "id": "subscription_discount", "label": "Subscribe & save discount", "min": 0, "max": 40, "step": 1, "unit": "%", "default": 15 }
+  ],
+  "blocks": [
+    { "type": "badge", "name": "Badge", "settings": [ { "type": "text", "id": "text", "label": "Badge text" } ] },
+    { "type": "include", "name": "Formula item", "settings": [ { "type": "text", "id": "text", "label": "Text", "info": "e.g. 1,000mg Potassium Citrate" } ] },
+    { "type": "benefit", "name": "Benefit", "settings": [
+      { "type": "text", "id": "icon", "label": "Icon", "default": "local_shipping", "info": "A Material Symbols icon name, e.g. local_shipping, payments, biotech, flag, nutrition." },
+      { "type": "text", "id": "label", "label": "Heading" },
+      { "type": "text", "id": "sub", "label": "Text" }
+    ] },
+    { "type": "accordion", "name": "Details tab", "settings": [
+      { "type": "text", "id": "title", "label": "Title" },
+      { "type": "richtext", "id": "content", "label": "Content" },
+      { "type": "checkbox", "id": "open", "label": "Open by default", "default": false }
+    ] },
+    { "type": "faq", "name": "FAQ", "settings": [
+      { "type": "text", "id": "question", "label": "Question" },
+      { "type": "textarea", "id": "answer", "label": "Answer" }
+    ] }
+  ]
+}
+{% endschema %}
