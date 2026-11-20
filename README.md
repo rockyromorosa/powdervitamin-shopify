@@ -67,6 +67,21 @@ The storefront presents product bundles and promotional offers alongside product
 
 [View the Electrolyte Benefits accordion demo](<02 - Homepage Sections/PowderVitamin_19_Electrolyte_Benefits_Accordion.mp4>)
 
+### Technical spotlight: Interactive Benefits Accordion
+
+This custom Shopify section combines **Liquid, JavaScript custom elements, and responsive CSS** to present educational product benefits alongside product imagery and a testimonial.
+
+**Implementation details documented from the project files:**
+
+- **Liquid section:** `sections/pv-benefits.liquid` builds the list from configurable Shopify `feature` blocks and supports editable heading, benefit copy, product imagery, testimonial, and decorative information cards.
+- **JavaScript interaction:** The `<pv-autoplay-steps>` custom element in `assets/pv-components.js` cycles through the benefit items. Visitors can also select a benefit directly. An animated progress bar uses `requestAnimationFrame` to display the current step's elapsed time.
+- **Configurable timing:** The theme section schema exposes an interval of **3–12 seconds**, with a default of **5 seconds**.
+- **Styling:** `assets/section-pv-benefits.css` controls the active panel, expansion transitions, progress indicator, visual effects, light/dark appearance, and mobile adaptations.
+- **Responsive behavior:** On smaller screens, spacing and text styles adapt and decorative floating cards are hidden.
+
+The repository showcases the feature through screenshots and a demonstration video rather than redistributing the client's production source code.
+
+
 ### Product detail page and purchase experience
 
 Product pages feature product imagery, benefit messaging, serving-size options, and distinct one-time and subscription selection states.
@@ -77,11 +92,35 @@ Product pages feature product imagery, benefit messaging, serving-size options, 
 
 ![Lemonade subscription selected](<03 - Product Detail Pages/PowderVitamin_25_Lemonade_Subscription_Selected.png>)
 
+### Technical spotlight: Product detail page and purchase options
+
+The PowderVitamin product page uses a **custom Shopify Liquid section** (`sections/pv-product-00.liquid`) alongside a JavaScript controller (`assets/pv-product-00-1.js`) to present a responsive product purchase experience.
+
+**Implementation details reviewed from the source files:**
+
+- **Shopify product data:** Liquid renders the current product and selected variant, including the initial price and purchase-button state. It exposes the selected product's details and configurable section blocks to the JavaScript controller.
+- **Migration-aware product mapping:** The JavaScript retains product descriptions and configuration originally ported from WooCommerce, matches legacy product slugs, and uses Shopify product information to override prices, variant IDs, and gallery images where available.
+- **Flavor and size selection:** Interactive chips display the selected flavor and serving size and navigate to the corresponding Shopify product URL.
+- **Purchase options:** One-time purchase is the default. Eligible core flavors can display **Monthly Subscription** with a configurable Subscribe & Save percentage; other flavors have that option disabled by the page logic.
+- **Pricing and quantity:** Client-side UI logic updates the displayed purchase prices, active selection, and quantity.
+- **Inventory-dependent states:** Product interface code supports **Add to Cart**, **Preorder Now**, and **Notify Me When in Stock**, depending on stock and backorder information.
+- **Supporting PDP features:** A product-image gallery, detail accordions, reviews interface, FAQ content, and responsive presentation support the purchase flow.
+
+**Integration note:** The supplied JavaScript retains WooCommerce-style URLs and AJAX calls as part of the migration. Its comments refer to a Shopify compatibility layer (`pv-compat.js`); that adapter was not reviewed here, so this documentation does not independently verify the complete cart or subscription integration. The project itself is completed and launched.
+
+As with the benefits accordion, the repository documents this feature without including the client's proprietary production source files.
+
 ### Supporting brand pages
 
 ![Our Story](<04 - Other Pages/PowderVitamin_28_Our_Story_Page.png>)
 
 ![Reactive vs. Proactive](<04 - Other Pages/PowderVitamin_29_Reactive_vs_Proactive.png>)
+
+### Collection page
+
+The collection layout presents the migrated product catalog and helps shoppers browse the Shopify storefront.
+
+![Shop All collection](<05 - Collection Pages/PowderVitamin_30_Shop_All_Collection.png>)
 
 ## What this project demonstrates
 
